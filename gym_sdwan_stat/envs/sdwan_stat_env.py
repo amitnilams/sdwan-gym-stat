@@ -123,16 +123,16 @@ class SdwanStatEnv(gym.Env):
 
         # every time we use the MPLS link reward is deducted
         if self.backend.active_link == 1:
-            reward -= 2
+            reward -= 1
 
         # check bandwidth for internet link - if less than SLA then penalize
         elif float(self.backend.current_bw)  <   float(self.backend.sla_bw):
             logging.debug('BW is less than SLA')
-            reward -= 5
+            reward -= 2
 
         # everything fine - reward up
         else:
-            reward += 1
+           reward += 2
 
         return reward
 
