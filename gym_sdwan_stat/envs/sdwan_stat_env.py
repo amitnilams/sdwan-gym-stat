@@ -23,7 +23,7 @@ from gym_sdwan_stat.envs.mininet_stat_backend import MininetStatBackEnd
 
 
 path = 'config.yaml'  # always use slash in packages
-filepath = pkg_resources.resource_filename('gym_sdwan', path)
+filepath = pkg_resources.resource_filename('gym_sdwan_stat', path)
 config = cfg_load.load(filepath)
 logging.config.dictConfig(config['LOGGING'])
 
