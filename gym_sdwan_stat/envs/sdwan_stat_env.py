@@ -36,7 +36,7 @@ class SdwanStatEnv(gym.Env):
     availability 
     """
 
-    def __init__(self, max_ticks=30):
+    def __init__(self, max_ticks=300):
         self.__version__ = "0.1.0"
         logging.info("SdwanEnv - Version {}".format(self.__version__))
 
@@ -65,7 +65,7 @@ class SdwanStatEnv(gym.Env):
 
         # episode over 
         self.episode_over = False
-        
+        self.info = {} 
 
         # Store what the agent tried
         self.curr_episode = -1
@@ -104,21 +104,33 @@ class SdwanStatEnv(gym.Env):
         self.take_action(action)
         reward = self.get_reward()
         ob = self.get_state()
-        return ob, reward, self.episode_over, {}
+        return ob, reward, self.episode_over, self.info 
 
     def take_action(self, action):
         self.episode_over = self.backend.switch_link(action)
                 
         self.ticks += 1
-        # Stop if max ticks over
-        if self.ticks == self.MAX_TICKS:
+
+        # check if episode ended by ERROR, then mark it in 'info'
+        if self.episode_over:
+            logging.info ('Episode ended by ERROR')
+            self.info['exit_status'] = 'ERROR'
+
+        # else Stop if max ticks over
+        elif self.ticks == self.MAX_TICKS:
             logging.info ('Max ticks over, ending episode')
             self.episode_over = True
+            self.info['exit_status'] = 'NORMAL'
 
     def get_reward(self):
 
         logging.debug('current bw:{0}, sla bw:{1}'.format(self.backend.current_bw, self.backend.sla_bw))
-        # reward for surviving this 'tick'
+
+        # maximum penalty for loosing the episode by ERROR
+        if self.episode_over and self.info['exit_status'] == 'ERROR':
+            return -5
+	
+        # otherwise, reward for surviving this 'tick'
         reward = 1
 
         # every time we use the MPLS link reward is deducted
